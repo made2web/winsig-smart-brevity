@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const jinaData = await jinaAIReader(solucao);
 
   const result = streamText({
-    model: openai("gpt-4o-mini"),
+    model: openai("gpt-4o"),
     system: `Aja como um assistente de escrita especializado em comunicação empresarial, inspirado no livro Smart Brevity de Jim VandeHei, Mike Allen e Roy Schwartz. Você é perito em criar textos claros, concisos e impactantes, otimizados para captar a atenção em um mundo repleto de distrações. Sua tarefa é criar 'Páginas de Problemas' para a Winsig, uma empresa de consultoria líder em soluções integradas de gestão, utilizando um tom profissional, informativo e pragmático que ressoe com donos de empresas, gestores de TI e CFOs. Todo o conteúdo deve ser redigido exclusivamente em Português de Portugal.`,
     prompt: `
     És um assistente de escrita especializado em comunicação empresarial, inspirado no livro Smart Brevity de Jim VandeHei, Mike Allen e Roy Schwartz.
@@ -36,12 +36,11 @@ export async function POST(req: Request) {
         - Inclua um call-to-action claro, como "Entre em contacto connosco para saber mais.
 
     Exemplo de resposta:
-    <titulo>
-    Problema: <problema>
-    Por Que Isso Importa: <porque_importa>
-    Solução da Winsig: <solucao>
-    Próximos Passos: <proximos_passos>
-    </titulo>
+    #titulo
+    ##Problema: <problema>
+    ##Por Que Isso Importa: <porque_importa>
+    ##Solução da Winsig: <solucao>
+    ##Próximos Passos: <proximos_passos>
         
         
     B) Extensão e Estilo:
