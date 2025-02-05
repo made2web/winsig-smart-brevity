@@ -1,14 +1,17 @@
+import { Nunito } from "next/font/google";
+
 import "@/styles/globals.css";
 import "@/styles/prosemirror.css";
-import 'katex/dist/katex.min.css';
-
+import "katex/dist/katex.min.css";
+import { Toaster } from "@/components/tailwind/ui/toaster";
+import { auth } from "@/lib/auth/server";
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import type { ReactNode } from "react";
-import Providers from "./providers";
 
-const title = "Novel - Notion-style WYSIWYG editor with AI-powered autocompletions";
-const description =
-  "Novel is a Notion-style WYSIWYG editor with AI-powered autocompletions. Built with Tiptap, OpenAI, and Vercel AI SDK.";
+const title = "Winsig - Smart Brevity";
+import Providers from "./providers";
+const description = "Winsig - Software de Gestão.";
 
 export const metadata: Metadata = {
   title,
@@ -23,18 +26,25 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     creator: "@steventey",
   },
-  metadataBase: new URL("https://novel.sh"),
+  metadataBase: new URL("https://www.winsig.pt/"),
 };
 
 export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+const nunito = Nunito({ subsets: ["latin"] });
+
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className={nunito.className}>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   );

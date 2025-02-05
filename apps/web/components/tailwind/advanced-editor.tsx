@@ -1,5 +1,4 @@
 "use client";
-import { defaultEditorContent } from "@/lib/content";
 import {
   EditorCommand,
   EditorCommandEmpty,
@@ -9,7 +8,6 @@ import {
   type EditorInstance,
   EditorRoot,
   ImageResizer,
-  type JSONContent,
   handleCommandNavigation,
   handleImageDrop,
   handleImagePaste,
@@ -23,6 +21,7 @@ import { MathSelector } from "./selectors/math-selector";
 import { NodeSelector } from "./selectors/node-selector";
 import { Separator } from "./ui/separator";
 
+import { saveArticle } from "@/app/actions/save-article";
 import GenerativeMenuSwitch from "./generative/generative-menu-switch";
 import { uploadFn } from "./image-upload";
 import { TextButtons } from "./selectors/text-buttons";
@@ -32,7 +31,11 @@ const hljs = require("highlight.js");
 
 const extensions = [...defaultExtensions, slashCommand];
 
-const TailwindAdvancedEditor = () => {
+const TailwindAdvancedEditor = ({
+  isLoading,
+  completion,
+  articleId,
+}: { isLoading: boolean; completion: string; articleId: string }) => {
   const [initialContent, setInitialContent] = useState<null | JSONContent>(null);
   const [saveStatus, setSaveStatus] = useState("Saved");
   const [charsCount, setCharsCount] = useState();
@@ -56,17 +59,35 @@ const TailwindAdvancedEditor = () => {
   const debouncedUpdates = useDebouncedCallback(async (editor: EditorInstance) => {
     const json = editor.getJSON();
     setCharsCount(editor.storage.characterCount.words());
-    window.localStorage.setItem("html-content", highlightCodeblocks(editor.getHTML()));
-    window.localStorage.setItem("novel-content", JSON.stringify(json));
-    window.localStorage.setItem("markdown", editor.storage.markdown.getMarkdown());
+
+    if (articleId) {
+      const result = await saveArticle(articleId, editor.storage.markdown.getMarkdown());
+      if (!result.success) {
+        console.error("Erro ao salvar o artigo:", result.error);
+      }
+    }
+    // window.localStorage.setItem("html-content", highlightCodeblocks(editor.getHTML()));
+    // window.localStorage.setItem("novel-content", JSON.stringify(json));
+    // window.localStorage.setItem("markdown", editor.storage.markdown.getMarkdown());
     setSaveStatus("Saved");
   }, 500);
 
   useEffect(() => {
-    const content = window.localStorage.getItem("novel-content");
-    if (content) setInitialContent(JSON.parse(content));
-    else setInitialContent(defaultEditorContent);
-  }, []);
+    if (completion) {
+      setInitialContent(completion);
+    }
+  }, [isLoading, completion]);
+
+  if (isLoading) {
+    return (
+      <div className="relative w-full max-w-screen-lg">
+        <div className="prose prose-lg dark:prose-invert prose-headings:font-title font-default min-h-[500px] w-full max-w-screen-lg border-muted bg-background p-4 sm:mb-[calc(20vh)] sm:rounded-lg sm:border sm:shadow-lg">
+          <div className="animate-pulse">A gerar conteúdo...</div>
+          {completion && <div className="whitespace-pre-wrap">{completion}</div>}
+        </div>
+      </div>
+    );
+  }
 
   if (!initialContent) return null;
 
@@ -78,6 +99,7 @@ const TailwindAdvancedEditor = () => {
           {charsCount} Words
         </div>
       </div>
+
       <EditorRoot>
         <EditorContent
           initialContent={initialContent}
@@ -93,6 +115,9 @@ const TailwindAdvancedEditor = () => {
               class:
                 "prose prose-lg dark:prose-invert prose-headings:font-title font-default focus:outline-none max-w-full",
             },
+          }}
+          onCreate={({ editor }) => {
+            setCharsCount(editor.storage.characterCount.words());
           }}
           onUpdate={({ editor }) => {
             debouncedUpdates(editor);
