@@ -87,7 +87,7 @@ export function CriarArtigoDialog() {
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="titulo" className="text-right">
-                Título *
+                Problema *
               </Label>
               <div className="col-span-3">
                 <Input
