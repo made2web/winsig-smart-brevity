@@ -97,7 +97,5 @@ export async function jinaAIReader(url: string): Promise<any> {
 
   const data = await response.json();
 
-  console.log("data", data);
-
   return data;
 }

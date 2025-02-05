@@ -11,8 +11,7 @@
     },
     "build": {
       "dependsOn": [
-        "^build",
-        "typecheck"
+        "^build"
       ],
       "outputs": [
         "dist/**",
